@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.tpl": "php",
-        "string.h": "c"
+        "string.h": "c",
+        "time.h": "c"
     }
 }

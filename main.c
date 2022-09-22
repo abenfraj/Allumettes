@@ -1,9 +1,41 @@
 #include <stdio.h>
-#include <string.h> 
+#include <string.h>
 #include <stdlib.h>
-#include <time.h> 
+#include <time.h>
+#include <ctype.h>
 
 #define MAX_CHAR_PLAYER_NAME 16
+
+void save_history(char player_name[], int result)
+{
+    FILE *fp;
+    fp = fopen("history.txt", "a");
+    switch (result)
+    {
+    case 0:
+        fprintf(fp, "%s a gagne (Joueur contre Joueur)\n", player_name);
+        fclose(fp);
+        break;
+    case 1:
+        fprintf(fp, "%s a gagne (Joueur contre IA - Facile)\n", player_name);
+        fclose(fp);
+        break;
+    case 2:
+        fprintf(fp, "%s a perdu (Joueur contre IA - Facile)\n", player_name);
+        fclose(fp);
+        break;
+    case 3:
+        fprintf(fp, "%s a gagne (Joueur contre IA - Difficile\n", player_name);
+        fclose(fp);
+        break;
+    case 4:
+        fprintf(fp, "%s a perdu (Joueur contre IA - Difficile\n", player_name);
+        fclose(fp);
+        break;
+    default:
+        break;
+    }
+}
 
 int check_player_name_input(char player_name[])
 {
@@ -15,42 +47,65 @@ int check_player_name_input(char player_name[])
     return 1;
 }
 
-void printmatches(int matches) {
-    for (int i = 0; i < matches; ++i) {
+void printmatches(int matches)
+{
+    for (int i = 0; i < matches; ++i)
+    {
         printf("| ");
     }
 }
 
-void pvp_mode(char player_name1[], char player_name2[]) {
+void pvp_mode(char player_name1[], char player_name2[])
+{
     int matches = 30;
-    int p1Matches = 0;
-    int p2Matches = 0;
+    char p1Matches = 0;
+    char p2Matches = 0;
     srand(time(NULL));
-    
-    printf("Jeu contre l'ordinateur, niveau facile avec %d allumettes au depart.\n\n", matches);
+
+    printf("Jeu contre un humain en local avec %d allumettes au depart.\n\n", matches);
     do
     {
         printmatches(matches);
         printf("\t- Il reste %d allumettes\n\n", matches);
-        do {
-            printf("J1 - Nombre d'allummettes a enlever (entre 1 et 3) : ");
-            scanf("%d", &p1Matches);
-        } while (p1Matches < 1 || p1Matches > 3);
-        matches -= p1Matches;
-        if (matches <= 0) {
-            printf("\nBravo J2, tu as gagne contre J1 !");
+        printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+        scanf(" %s", &p1Matches);
+        while (p1Matches < 49 || p1Matches > 51 || strlen(&p1Matches) > 1)
+        {
+            printf("On ne peut pas faire ca... :/\n");
+            printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+            scanf(" %s", &p1Matches);
+        }
+
+        int nbMatches = p1Matches - 48;
+        matches -= nbMatches;
+
+        if (matches <= 0)
+        {
+            printf("\nBravo %s (J2), tu as gagne contre %s (J1) !\n", player_name2, player_name1);
+            save_history(player_name2, 0);
             break;
         }
-        else {
+        else
+        {
             printmatches(matches);
             printf("\t- Il reste %d allumettes\n\n", matches);
-            do {
-                printf("J2 - Nombre d'allummettes à enlever (entre 1 et 3) : ");
-                scanf("%d", &p2Matches);
-            } while (p2Matches < 1 || p2Matches > 3);
-            matches -= p2Matches;
-            if (matches <= 0) {
-                printf("\nBravo J1, tu as gagne contre J2 !");
+            printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+            scanf(" %s", &p1Matches);
+
+            while (p1Matches < 49 || p1Matches > 51 || strlen(&p1Matches) > 1)
+            {
+                printf("On ne peut pas faire ca... :/\n");
+                printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+                scanf(" %s", &p1Matches);
+            }
+
+            int nbMatches = p1Matches - 48;
+            matches -= nbMatches;
+
+            if (matches <= 0)
+            {
+                printf("\nBravo %s (J1), tu as gagne contre %s (J2) !\n", player_name1, player_name2);
+                save_history(player_name1, 0);
                 break;
             }
         }
@@ -64,86 +119,112 @@ void pvp_mode_menu()
     char player_name2[MAX_CHAR_PLAYER_NAME] = {};
 
     printf("\n\nVous avez rejoint le mode Joueur contre Joueur !\n");
-    while (check_player_name_input(player_name1) != 1)
+    do
     {
         printf("Nom joueur 1 : ");
         scanf("%s", player_name1);
-    }
-    while (check_player_name_input(player_name2) != 1)
+    } while (check_player_name_input(player_name1) != 1);
+    do
     {
         printf("Nom joueur 2 : ");
         scanf("%s", player_name2);
-    }
+    } while (check_player_name_input(player_name2) != 1);
+
     pvp_mode(player_name1, player_name2);
 }
 
 void easy_ia_mode()
 {
-    int matches = 5;
-    int p1Matches = 0;
+    int matches = 30;
+    char p1Matches = 0;
     int iaMatches = 0;
     srand(time(NULL));
-    
+
     printf("Jeu contre l'ordinateur, niveau facile avec %d allumettes au depart.\n\n", matches);
     do
     {
         printmatches(matches);
         printf("\t- Il reste %d allumettes\n\n", matches);
-        do {
-            printf("J1 - Nombre d'allummettes à enlever (entre 1 et 3) : ");
-            scanf("%d", &p1Matches);
-        } while (p1Matches < 1 || p1Matches > 3);
-        matches -= p1Matches;
-        if (matches <= 0) {
-            printf("\nPerdu ! L'important c'est de participer tu sais :(");
+        printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+        scanf(" %s", &p1Matches);
+        while (p1Matches < 49 || p1Matches > 51 || strlen(&p1Matches) > 1)
+        {
+            printf("On ne peut pas faire ca... :/\n");
+            printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+            scanf(" %s", &p1Matches);
+        }
+        int nbMatches = p1Matches - 48;
+        matches -= nbMatches;
+        if (matches <= 0)
+        {
+            printf("\nPerdu ! L'important c'est de participer, tu sais ? :(\n");
+            save_history("Un utilisateur", 2);
             return;
         }
-        else {// else de l'IA
-           printmatches(matches);
-           printf("\t- Il reste %d allumettes\n\n", matches);
-           iaMatches = rand() % 3 + 1;
-           printf("L'ordinateur retire aleatoirement %d allumettes\n", iaMatches);
-           matches -= iaMatches;
+        else
+        {
+            printmatches(matches);
+            printf("\t- Il reste %d allumettes\n\n", matches);
+            iaMatches = rand() % 3 + 1;
+            printf("L'ordinateur retire aleatoirement %d allumettes\n", iaMatches);
+            matches -= iaMatches;
         }
     } while (matches > 0);
-    printf("\nBien joue tu as remporte la partie !");
+    printf("\nBien joue tu as remporte la partie !\n");
+    save_history("Un utilisateur", 1);
 }
 
-void hard_ia_mode() {
-        int matches = 30;
-    int p1Matches = 0;
+void hard_ia_mode()
+{
+    int matches = 30;
+    char p1Matches = 0;
     int iaMatches = 0;
     srand(time(NULL));
-    
+
     printf("Jeu contre l'ordinateur, niveau facile avec %d allumettes au depart.\n\n", matches);
+
     do
     {
         printmatches(matches);
         printf("\t- Il reste %d allumettes\n\n", matches);
-        do {
-            printf("J1 - Nombre d'allummettes à enlever (entre 1 et 3) : ");
-            scanf("%d", &p1Matches);
-        } while (p1Matches < 1 || p1Matches > 3);
-        matches -= p1Matches;
-        if (matches <= 0) {
-            printf("\nPerdu ! L'important c'est de participer tu sais :(\n\n");
+        printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+        scanf(" %s", &p1Matches);
+        while (p1Matches < 49 || p1Matches > 51 || strlen(&p1Matches) > 1)
+        {
+            printf("On ne peut pas faire ca... :/\n");
+            printf("Votre tour - Nombre d'allummettes a enlever (entre 1 et 3) : ");
+            scanf(" %s", &p1Matches);
+        }
+
+        int nbMatches = p1Matches - 48;
+        matches -= nbMatches;
+
+        if (matches <= 0)
+        {
+            printf("\nPerdu ! L'important c'est de participer, tu sais ? :(\n\n");
+            save_history("Un utilisateur", 4);
+
             return;
         }
-        else {
+        else
+        {
             printmatches(matches);
             printf("\t- Il reste %d allumettes\n\n", matches);
             iaMatches = (matches % 4) - 1;
-            if(iaMatches == 0) {
+            if (iaMatches == 0)
+            {
                 iaMatches = 1;
             }
-            if(iaMatches < 0) {
+            if (iaMatches < 0)
+            {
                 iaMatches = 3;
             }
             printf("L'ordinateur retire %d allumettes\n", iaMatches);
             matches -= iaMatches;
         }
     } while (matches > 0);
-    printf("\nBien joue tu as remporte la partie !");
+    printf("\nBien joue vous avez remporte la partie !");
+    save_history("Un utilisateur", 3);
 }
 
 void pvia_mode_menu()
@@ -163,12 +244,9 @@ void pvia_mode_menu()
         break;
     default:
         printf("Cette entree n'est pas reconnue, veuillez reessayer");
-        printf("pvia_mode_menu()");
         break;
     }
 }
-
-
 
 void game_mode_choice()
 {
@@ -200,7 +278,7 @@ void show_rules()
     printf("Le perdant est celui qui doit enlever la derniere allumette.\n");
     printf("Attention, il existe 3 niveaux de difficulte en version humain vs_ordi.\n");
     printf("Le ler est plutot simple a battre, donc pour les debut ants. Mais le dernier...\n");
-    printf("Contactez-moi si vous avez reussi (screenshot evidemment** ), mon e-mail est dans les credits.\n\n");
+    printf("Contactez-moi si vous avez reussi (screenshot evidemment ^^), mon e-mail est dans les credits.\n\n");
     printf("*****************\n\n");
 }
 
@@ -209,7 +287,20 @@ void show_credits()
     printf("\n\n*****CREDITS*****\n\n");
     printf("COPYRIGHT © 2022\n");
     printf("Ayoub & Simeon\n\n");
-    printf("*****************\n\n");
+    printf("Ayoub: ayoub.ben-fraj@efrei.net\n");
+    printf("Simeon: simeon.deiva@efrei.net\n");
+    printf("******************\n\n");
+    printf("**  HISTORIQUE  **\n\n");
+
+    char buffer[500];
+    FILE *file_ = fopen("history.txt", "r");
+    while (!feof(file_))
+    {
+        fread(buffer, sizeof(buffer), 1, file_);
+        printf("%s", buffer);
+    }
+    fclose(file_);
+    printf("\n******************\n\n");
 }
 
 int main()
